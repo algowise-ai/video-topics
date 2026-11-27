@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>短片題材紀錄</title>
+<style>
+:root{--bg:#07090f;--panel:#10131c;--card:#151922;--border:#252a36;--text:#f2f4f8;--muted:#9aa3b5;--accent:#00d4a8;--neg:#ff5c7a}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang HK","Noto Sans TC",sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.gate-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+h1{margin:0 0 8px;font-size:1.25rem}
+p{color:var(--muted);font-size:.9rem;margin:0 0 16px}
+input[type=password]{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:1rem;margin-bottom:10px}
+button{width:100%;background:var(--accent);color:#04140f;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+.err{color:var(--neg);font-size:.85rem;min-height:1.2em;margin:0 0 8px}
+.note{font-size:.75rem;color:var(--muted);margin-top:12px}
+</style>
+</head>
+<body>
+<div class="gate" role="dialog" aria-modal="true">
+  <div class="gate-card">
+    <h1>短片題材紀錄</h1>
+    <p>輸入頁面密碼繼續（唔需要 GitHub 登入）。解鎖後會開啟私人書庫連結，播放仍需要 Tailscale。</p>
+    <input id="gatePw" type="password" autocomplete="current-password" placeholder="頁面密碼" autofocus/>
+    <p class="err" id="gateErr"></p>
+    <button type="button" id="gateGo">進入</button>
+    <p class="note">AES-GCM 密碼門。GitHub 唔存放影片。密碼唔好分享到公開地方。</p>
+  </div>
+</div>
+<script>
+(function(){
+  const PAYLOAD = {"salt":"hgtbAxd8NheCY9q6KIF5nA==","iv":"TlhIzQRHCDXcuN7h","ct":"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"};
+  const KEY = 'video_topics_gate_ok';
+  const ITER = 200000;
+
+  function b64(s){
+    const bin = atob(s);
+    const out = new Uint8Array(bin.length);
+    for (let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+    return out;
+  }
+  async function deriveKey(password, salt){
+    const enc = new TextEncoder();
+    const material = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      {name:'PBKDF2', salt:salt, iterations:ITER, hash:'SHA-256'},
+      material,
+      {name:'AES-GCM', length:256},
+      false,
+      ['decrypt']
+    );
+  }
+  async function decrypt(password){
+    const salt = b64(PAYLOAD.salt);
+    const iv = b64(PAYLOAD.iv);
+    const data = b64(PAYLOAD.ct);
+    const key = await deriveKey(password, salt);
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:iv}, key, data);
+    return new TextDecoder().decode(pt);
+  }
+  async function unlockWith(password){
+    const html = await decrypt(password);
+    try { sessionStorage.setItem(KEY, password); } catch(e) {}
+    document.open();
+    document.write(html);
+    document.close();
+  }
+  async function tryUnlock(password){
+    const err = document.getElementById('gateErr');
+    try {
+      await unlockWith(password);
+    } catch (e) {
+      err.textContent = '密碼不正確 / Incorrect password';
+    }
+  }
+  document.getElementById('gateGo').addEventListener('click', function(){
+    tryUnlock(document.getElementById('gatePw').value);
+  });
+  document.getElementById('gatePw').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') tryUnlock(e.target.value);
+  });
+  try {
+    const saved = sessionStorage.getItem(KEY);
+    if (saved) tryUnlock(saved);
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
